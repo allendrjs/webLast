@@ -1,10 +1,13 @@
 import { apiClient } from "./client";
 import type { Enrollment } from "../types/enrollment";
 
-// TODO(OSDA-web): wire up against the backend's enrollment-related controller
-// once this feature is picked up. Endpoint path below is a placeholder -
-// confirm the exact path against the live API before relying on it.
-export async function getEnrollmentList(): Promise<Enrollment[]> {
-  const response = await apiClient.get<Enrollment[]>("/api/enrollments");
-  return response.data;
+// Mirrors org.rocs.osdrmsa.controller.enrollment.EnrollmentController -
+// GET /api/enrollments/student/{studentId}/latest, guarded server-side by
+// @access.isSelfStudent for STUDENT-role callers. Returns the raw
+// Enrollment entity (see types/enrollment.ts for why), so callers get
+// null back (404) rather than an error when a student has no enrollment
+// on file - handle that case, don't assume it always resolves.
+export async function getLatestEnrollmentByStudent(studentId: string): Promise<Enrollment | null> {
+  const response = await apiClient.get<Enrollment>(`/api/enrollments/student/${studentId}/latest`);
+  return response.data ?? null;
 }

@@ -1,0 +1,645 @@
+/*
+  Design tokens reused from mobLast's ui/theme/Theme.kt - specifically the
+  *post-design-audit* values (the muted/amber/green/red colors here were
+  darkened during Mobile's accessibility pass to clear WCAG AA 4.5:1
+  contrast; reusing them here means Web starts from already-verified
+  colors instead of the original pre-audit Figma values).
+*/
+:root {
+  --osda-background: #f7f5f2;
+  --osda-surface: #ffffff;
+  --osda-border: #eae8e4;
+  --osda-primary: #14123a;
+  --osda-primary-muted: #bfbfe5;
+  --osda-heading: #1a1a2e;
+  --osda-muted: #6d6d7f;
+  --osda-nav-inactive: #6e6e7d;
+
+  --osda-amber: #916515;
+  --osda-amber-bg: #fdf1d6;
+  --osda-green: #1a7945;
+  --osda-green-bg: #dcf5e3;
+  --osda-red: #c22b2b;
+  --osda-red-bg: #fbdfdf;
+
+  --osda-radius-card: 14px;
+  --osda-radius-outer: 24px;
+  --osda-radius-pill: 999px;
+  --osda-radius-button: 12px;
+  --osda-radius-input: 10px;
+
+  --osda-content-max-width: 480px;
+  --osda-sidebar-width: 220px;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--osda-background);
+  color: var(--osda-heading);
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------- App shell: bottom nav on narrow screens, sidebar on wide ---------- */
+
+.osda-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.osda-shell__content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 88px; /* room for the fixed bottom nav on mobile */
+}
+
+.osda-shell__inner {
+  width: 100%;
+  max-width: var(--osda-content-max-width);
+  padding: 20px;
+}
+
+.osda-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--osda-surface);
+  border-top: 1px solid var(--osda-border);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 10;
+}
+
+.osda-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--osda-nav-inactive);
+  font-size: 11px;
+  padding: 4px 8px;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.osda-nav-item[data-active="true"] {
+  color: var(--osda-primary);
+  font-weight: 600;
+}
+
+.osda-nav-item__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.osda-sidebar {
+  display: none;
+}
+
+/* Wide viewports (laptop/desktop): switch to a persistent left sidebar
+   instead of a bottom tab bar, and let content breathe wider than the
+   480px mobile column. */
+@media (min-width: 768px) {
+  .osda-shell__content {
+    padding-bottom: 0;
+  }
+
+  .osda-shell__inner {
+    max-width: 720px;
+    padding: 32px 40px;
+  }
+
+  .osda-bottom-nav {
+    display: none;
+  }
+
+  .osda-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: var(--osda-sidebar-width);
+    flex-shrink: 0;
+    background: var(--osda-surface);
+    border-right: 1px solid var(--osda-border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .osda-sidebar__brand {
+    padding: 0 24px 24px;
+    font-weight: 700;
+    color: var(--osda-primary);
+  }
+
+  .osda-sidebar .osda-nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 14px;
+    min-height: auto;
+  }
+}
+
+/* ---------- Shared building blocks ---------- */
+
+.osda-card {
+  background: var(--osda-surface);
+  border: 1px solid var(--osda-border);
+  border-radius: var(--osda-radius-card);
+  padding: 14px;
+}
+
+.osda-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.osda-stat-card {
+  text-align: center;
+  border: 1px solid var(--osda-border);
+  border-radius: var(--osda-radius-card);
+  padding: 14px 6px;
+  background: var(--osda-surface);
+}
+
+.osda-stat-card__value {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.osda-stat-card__label {
+  font-size: 10px;
+  color: var(--osda-muted);
+  margin: 2px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.osda-pill {
+  display: inline-block;
+  border-radius: var(--osda-radius-pill);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.osda-filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.osda-filter-pill {
+  border-radius: var(--osda-radius-pill);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--osda-border);
+  background: var(--osda-surface);
+  color: var(--osda-muted);
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.osda-filter-pill[data-selected="true"] {
+  background: var(--osda-primary);
+  border-color: var(--osda-primary);
+  color: #ffffff;
+}
+
+.osda-btn-primary {
+  width: 100%;
+  border: none;
+  border-radius: var(--osda-radius-button);
+  background: var(--osda-primary);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.osda-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.osda-btn-secondary {
+  width: 100%;
+  border: 1px solid var(--osda-border);
+  border-radius: var(--osda-radius-button);
+  background: var(--osda-surface);
+  color: var(--osda-heading);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.osda-input-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--osda-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.osda-input {
+  width: 100%;
+  border: 1px solid var(--osda-border);
+  border-radius: var(--osda-radius-input);
+  padding: 12px 14px;
+  font-size: 14px;
+  background: var(--osda-surface);
+  color: var(--osda-heading);
+}
+
+.osda-input:focus {
+  outline: 2px solid var(--osda-primary);
+  outline-offset: 1px;
+}
+
+.osda-banner {
+  background: var(--osda-primary);
+  border-radius: 16px;
+  padding: 18px;
+  color: #ffffff;
+}
+
+.osda-textarea {
+  min-height: 90px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.osda-banner-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.osda-banner-action__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.osda-banner__muted {
+  color: var(--osda-primary-muted);
+}
+
+.osda-section-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.osda-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.osda-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.osda-muted-text {
+  color: var(--osda-muted);
+  font-size: 13px;
+}
+
+.osda-error-text {
+  color: var(--osda-red);
+  font-size: 13px;
+}
+
+/* ---------- Profile: info rows, action rows ---------- */
+
+.osda-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--osda-border);
+}
+
+.osda-info-row:last-child {
+  border-bottom: none;
+}
+
+.osda-info-row__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--osda-muted);
+  font-size: 12px;
+}
+
+.osda-info-row__value {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.osda-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--osda-surface);
+  border: 1px solid var(--osda-border);
+  border-radius: var(--osda-radius-card);
+  padding: 14px;
+  cursor: default;
+  text-align: left;
+}
+
+.osda-action-row__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--osda-primary-muted);
+  color: var(--osda-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.osda-action-row__label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Dashboard: clock banner, stat icons, bar chart, mini table ---------- */
+
+.osda-clock-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.osda-clock-banner__divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--osda-primary-muted);
+  opacity: 0.4;
+}
+
+.osda-clock-banner__day {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--osda-primary-muted);
+  margin: 0 0 2px;
+}
+
+.osda-clock-banner__date {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.osda-clock-banner__month {
+  font-size: 12px;
+  color: var(--osda-primary-muted);
+  margin: 2px 0 0;
+}
+
+.osda-clock-banner__time {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.osda-clock-banner__tz {
+  font-size: 11px;
+  color: var(--osda-primary-muted);
+  margin: 2px 0 0;
+}
+
+.osda-stat-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+
+.osda-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.osda-bar-row:last-child {
+  margin-bottom: 0;
+}
+
+.osda-bar-row__label {
+  width: 68px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--osda-heading);
+}
+
+.osda-bar-track {
+  flex: 1;
+  height: 16px;
+  border: 1px solid var(--osda-primary);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--osda-surface);
+}
+
+.osda-bar-fill {
+  height: 100%;
+  background: var(--osda-primary);
+  border-radius: 999px;
+}
+
+.osda-mini-table__header {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.osda-mini-table__header-cell {
+  background: var(--osda-background);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--osda-muted);
+  text-align: center;
+}
+
+.osda-mini-table__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--osda-border);
+  font-size: 12px;
+  text-align: center;
+}
+
+.osda-mini-table__row:last-child {
+  border-bottom: none;
+}
+
+/* ---------- Login ---------- */
+
+.osda-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.osda-login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--osda-surface);
+  border-radius: var(--osda-radius-outer);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.osda-login-mark {
+  width: 69px;
+  height: 69px;
+  border-radius: 999px;
+  background: var(--osda-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.osda-login-title {
+  margin: 16px 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--osda-heading);
+}
+
+.osda-login-subtitle {
+  margin: 0 0 22px;
+  font-size: 13px;
+  color: var(--osda-muted);
+}
+
+.osda-login-field {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+/* ---------- Modal (logout confirmation) ---------- */
+
+.osda-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 58, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 20px;
+}
+
+.osda-modal {
+  background: var(--osda-surface);
+  border-radius: var(--osda-radius-card);
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.osda-modal__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--osda-amber-bg);
+  color: var(--osda-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 20px;
+}
+
+.osda-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
