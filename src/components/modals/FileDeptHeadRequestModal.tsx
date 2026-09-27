@@ -2,7 +2,6 @@ import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import axios from "axios";
 
 import { submitRequest } from "../../services/requestApi";
-import type { RequestItem } from "../../types/request";
 
 import SearchableDropdown from "./SearchableDropdown";
 
@@ -16,12 +15,12 @@ interface FileDeptHeadRequestModalProps {
     onFiled: () => void;
 }
 
-// TODO: replace these with real data (student IDs, sections, batches/levels)
-// once fetching is wired up. Kept as plain arrays for now so the dropdown
-// UI/behavior can be reviewed on its own first.
-const PLACEHOLDER_STUDENT_OPTIONS = ["JHS-0046", "JHS-0102", "SHS-0017", "SHS-0088"];
-const PLACEHOLDER_SECTION_OPTIONS = ["St. Augustine", "St. Benedict", "St. Cecilia", "St. Dominic"];
-const PLACEHOLDER_BATCH_OPTIONS = ["Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"];
+// TODO: fetch these from the backend (student IDs, sections, batches/levels)
+// and populate accordingly. Left empty for now — the dropdown UI/behavior
+// can still be reviewed, it'll just have nothing to show until then.
+const STUDENT_OPTIONS: string[] = [];
+const SECTION_OPTIONS: string[] = [];
+const BATCH_OPTIONS: string[] = [];
 
 function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadRequestModalProps) {
 
@@ -32,7 +31,6 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [hasFiled, setHasFiled] = useState(false);
-    const [submittedRequest, setSubmittedRequest] = useState<RequestItem | null>(null);
 
     useEffect(() => {
         if (!show) return;
@@ -42,7 +40,6 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
         setMessage("");
         setSubmitError("");
         setHasFiled(false);
-        setSubmittedRequest(null);
     }, [show]);
 
     if (!show) return null;
@@ -63,10 +60,10 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
 
     const currentOptions =
         scopeType === "By Student"
-            ? PLACEHOLDER_STUDENT_OPTIONS
+            ? STUDENT_OPTIONS
             : scopeType === "By Section"
-                ? PLACEHOLDER_SECTION_OPTIONS
-                : PLACEHOLDER_BATCH_OPTIONS;
+                ? SECTION_OPTIONS
+                : BATCH_OPTIONS;
 
     const handleScopeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setScopeType(e.target.value as ScopeType);
@@ -91,13 +88,12 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
             setSubmitting(true);
             setSubmitError("");
 
-            const submitted = await submitRequest({
+            await submitRequest({
                 type: scopeType,
                 details: details.trim(),
                 message: message.trim(),
             });
 
-            setSubmittedRequest(submitted);
             setHasFiled(true);
         } catch (err) {
             console.error("Failed to submit request:", err);
@@ -149,21 +145,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
 
                         <p className="new-request-hint mb-4">
                             Your request has been filed and is now waiting for the Prefect's approval.
-                            {submittedRequest?.aiResponse
-                                ? " Here's what our system noticed:"
-                                : ""}
                         </p>
-
-                        {submittedRequest?.aiResponse && (
-                            <div className="request-ai-suggestion-card mb-4">
-                                <div className="request-ai-suggestion-icon">
-                                    <i className="bi bi-stars"></i>
-                                </div>
-                                <div className="request-ai-suggestion-text">
-                                    {submittedRequest.aiResponse}
-                                </div>
-                            </div>
-                        )}
 
                         <p className="new-request-hint mb-0">
                             You'll be able to track its status from your Requests page.
