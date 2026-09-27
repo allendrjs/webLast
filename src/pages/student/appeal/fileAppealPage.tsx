@@ -124,7 +124,13 @@ function FileAppealPage() {
             setHasFiled(true);
         } catch (err) {
             console.error("Failed to submit appeal:", err);
-            setSubmitError("Failed to submit appeal. Please try again.");
+            // Surface the backend's own message when it's one of our known,
+            // student-facing error codes (e.g. FILE_TOO_LARGE) instead of
+            // always showing the generic fallback -- this is what made an
+            // oversized PDF look like "PDFs just don't work."
+            const backendMessage = (err as { response?: { data?: { message?: string } } })
+                ?.response?.data?.message;
+            setSubmitError(backendMessage || "Failed to submit appeal. Please try again.");
         } finally {
             setSubmitting(false);
             setSubmitStage("idle");
