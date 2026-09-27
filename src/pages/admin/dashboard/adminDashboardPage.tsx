@@ -143,7 +143,6 @@ function AdminDashboardPage() {
     const [offenseForm, setOffenseForm] = useState<OffenseInput>(emptyOffenseForm);
     const [offenseFormError, setOffenseFormError] = useState("");
     const [savingOffense, setSavingOffense] = useState(false);
-    const [savingStatusIds, setSavingStatusIds] = useState<Set<number>>( new Set());
     const [savingStudentStatusIds, setSavingStudentStatusIds] = useState<Set<string>>(new Set());
     const [savingOffenseStatusIds, setSavingOffenseStatusIds] = useState<Set<number>>(new Set());
     const [showStudentImportModal, setShowStudentImportModal] = useState(false);
