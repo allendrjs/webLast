@@ -8,6 +8,7 @@ export interface RequestItem {
     dateFiled: string | null;
     dateProcessed: string | null;
     remarks: string | null;
+    graduationEligibility: string | null;
 }
 
 export interface RequestSubmitPayload {

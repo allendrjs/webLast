@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent, ChangeEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import axios from "axios";
 
 import { submitRequest } from "../../services/requestApi";
@@ -7,24 +7,20 @@ import SearchableDropdown from "./SearchableDropdown";
 
 import "./FileDeptHeadRequestModal.css";
 
-type ScopeType = "By Student" | "By Section" | "By Batch";
-
 interface FileDeptHeadRequestModalProps {
     show: boolean;
     onClose: () => void;
     onFiled: () => void;
 }
 
-// TODO: fetch these from the backend (student IDs, sections, batches/levels)
-// and populate accordingly. Left empty for now — the dropdown UI/behavior
-// can still be reviewed, it'll just have nothing to show until then.
+// TODO: fetch these from the backend (student IDs enrolled in this
+// department head's department) and populate accordingly. Left empty for
+// now — the dropdown UI/behavior can still be reviewed, it'll just have
+// nothing to show until then.
 const STUDENT_OPTIONS: string[] = [];
-const SECTION_OPTIONS: string[] = [];
-const BATCH_OPTIONS: string[] = [];
 
 function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadRequestModalProps) {
 
-    const [scopeType, setScopeType] = useState<ScopeType>("By Section");
     const [details, setDetails] = useState("");
     const [message, setMessage] = useState("");
 
@@ -35,7 +31,6 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     useEffect(() => {
         if (!show) return;
 
-        setScopeType("By Section");
         setDetails("");
         setMessage("");
         setSubmitError("");
@@ -43,33 +38,6 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     }, [show]);
 
     if (!show) return null;
-
-    const detailsLabel =
-        scopeType === "By Student"
-            ? "Student ID"
-            : scopeType === "By Section"
-                ? "Section"
-                : "Grade/Level or Batch";
-
-    const detailsPlaceholder =
-        scopeType === "By Student"
-            ? "e.g. JHS-0046"
-            : scopeType === "By Section"
-                ? "e.g. St. Augustine"
-                : "e.g. Grade 10";
-
-    const currentOptions =
-        scopeType === "By Student"
-            ? STUDENT_OPTIONS
-            : scopeType === "By Section"
-                ? SECTION_OPTIONS
-                : BATCH_OPTIONS;
-
-    const handleScopeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-        setScopeType(e.target.value as ScopeType);
-        // Clear the selection since the available options change with scope.
-        setDetails("");
-    };
 
     const canSubmit =
         details.trim() !== "" &&
@@ -89,7 +57,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
             setSubmitError("");
 
             await submitRequest({
-                type: scopeType,
+                type: "By Student",
                 details: details.trim(),
                 message: message.trim(),
             });
@@ -160,46 +128,25 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                             <div className="file-request-section">
                                 <div className="file-request-section-title">
                                     <span className="file-request-step-num">1</span>
-                                    Request Scope
+                                    Student ID <span className="required-asterisk">*</span>
                                 </div>
-                                <label className="new-request-section-label" htmlFor="scopeType">
-                                    Request Scope <span className="required-asterisk">*</span>
-                                </label>
                                 <p className="new-request-hint mb-2">
-                                    Choose whether you're requesting records for a specific student, or by group.
+                                    Requests may only be filed for a single, specific student.
                                 </p>
-                                <select
-                                    id="scopeType"
-                                    className="form-select new-request-select"
-                                    value={scopeType}
-                                    onChange={handleScopeChange}
-                                    disabled={submitting}
-                                >
-                                    <option value="By Student">By Student</option>
-                                    <option value="By Section">By Section</option>
-                                    <option value="By Batch">By Batch / Grade Level</option>
-                                </select>
-                            </div>
-
-                            <div className="file-request-section">
-                                <div className="file-request-section-title">
-                                    <span className="file-request-step-num">2</span>
-                                    {detailsLabel} <span className="required-asterisk">*</span>
-                                </div>
                                 <SearchableDropdown
                                     id="requestDetails"
                                     value={details}
                                     onChange={setDetails}
-                                    options={currentOptions}
-                                    placeholder={detailsPlaceholder}
+                                    options={STUDENT_OPTIONS}
+                                    placeholder="e.g. JHS-0046"
                                     disabled={submitting}
-                                    emptyLabel={`No matching ${detailsLabel.toLowerCase()} found`}
+                                    emptyLabel="No matching student found"
                                 />
                             </div>
 
                             <div className="file-request-section">
                                 <div className="file-request-section-title">
-                                    <span className="file-request-step-num">3</span>
+                                    <span className="file-request-step-num">2</span>
                                     Reason for Request <span className="required-asterisk">*</span>
                                 </div>
                                 <p className="new-request-hint mb-2">
