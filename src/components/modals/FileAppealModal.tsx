@@ -81,10 +81,26 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
         );
     };
 
+    // The status of whichever not-yet-approved appeal is currently blocking
+    // re-filing for this record, or null if nothing is blocking it. Used to
+    // give DENIED a more specific explanation than PENDING: a denied appeal
+    // is a closed-door policy (visit OSD in person), not just "wait and see."
+    const blockingAppealStatus = (recordId: number): string | null => {
+        const blocking = appeals.find(
+            (appeal) =>
+                Number(appeal.record.recordId) === Number(recordId) &&
+                appeal.status?.toUpperCase() !== "APPROVED"
+        );
+        return blocking?.status?.toUpperCase() ?? null;
+    };
+
     const selectedRecord = pendingRecords.find((r) => String(r.recordId) === selectedRecordId);
 
     const selectedRecordHasUnapprovedAppeal =
         selectedRecord !== undefined && hasUnapprovedAppeal(selectedRecord.recordId);
+
+    const selectedRecordWasDenied =
+        selectedRecord !== undefined && blockingAppealStatus(selectedRecord.recordId) === "DENIED";
 
     const canSubmit =
         selectedRecord !== undefined &&
@@ -242,16 +258,25 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
                                     <option value="" disabled>
                                         {loading ? "Loading offenses..." : "Tap to choose offense"}
                                     </option>
-                                    {pendingRecords
-                                        .filter((record) => !hasUnapprovedAppeal(record.recordId))
-                                        .map((record) => (
+                                    {pendingRecords.map((record) => {
+                                        const blockingStatus = blockingAppealStatus(record.recordId);
+                                        const isDenied = blockingStatus === "DENIED";
+                                        const isBlocked = blockingStatus !== null;
+                                        const label = isDenied
+                                            ? `${record.offense.offense} — filed ${record.dateOfViolation} (Appeal denied — visit OSD in person)`
+                                            : isBlocked
+                                                ? `${record.offense.offense} — filed ${record.dateOfViolation} (Appeal pending)`
+                                                : `${record.offense.offense} — filed ${record.dateOfViolation}`;
+                                        return (
                                             <option
                                                 key={record.recordId}
                                                 value={String(record.recordId)}
+                                                disabled={isBlocked}
                                             >
-                                                {record.offense.offense} — filed {record.dateOfViolation}
+                                                {label}
                                             </option>
-                                        ))}
+                                        );
+                                    })}
                                 </select>
                                 {!loading && pendingRecords.length === 0 && (
                                     <p className="new-appeal-hint mb-0 mt-2">
@@ -262,7 +287,9 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
                                     pendingRecords.length > 0 &&
                                     pendingRecords.every((record) => hasUnapprovedAppeal(record.recordId)) && (
                                         <p className="new-appeal-hint mb-0 mt-2">
-                                            All of your pending offenses already have appeals that have not been approved yet.
+                                            {pendingRecords.every((record) => blockingAppealStatus(record.recordId) === "DENIED")
+                                                ? "This appeal was denied. To contest it further, please visit the Office of Student Discipline in person."
+                                                : "All of your pending offenses already have appeals that have not been approved yet."}
                                         </p>
                                     )}
                             </div>
@@ -340,7 +367,9 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
 
                             {selectedRecordHasUnapprovedAppeal && (
                                 <p className="text-danger">
-                                    You already have an appeal for this offense that has not been approved yet.
+                                    {selectedRecordWasDenied
+                                        ? "This appeal was denied. To contest it further, please visit the Office of Student Discipline in person."
+                                        : "You already have an appeal for this offense that has not been approved yet."}
                                 </p>
                             )}
 
