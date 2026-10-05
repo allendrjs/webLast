@@ -43,3 +43,30 @@
     opacity: 0.6;
     font-size: 12px;
 }
+
+.delivery-method-options {
+    display: flex;
+    gap: 10px;
+}
+
+.delivery-method-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border, #e2e2e8);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.delivery-method-option.selected {
+    border-color: var(--color-navy-accent, #1b1b8f);
+    background: #ecebfc;
+    color: var(--color-navy-accent, #1b1b8f);
+}
+
+.delivery-method-option input {
+    accent-color: var(--color-navy-accent, #1b1b8f);
+}

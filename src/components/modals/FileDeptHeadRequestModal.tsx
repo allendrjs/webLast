@@ -20,6 +20,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     const [students, setStudents] = useState<Student[]>([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [message, setMessage] = useState("");
+    const [deliveryMethod, setDeliveryMethod] = useState<"HARDCOPY" | "EMAIL">("HARDCOPY");
 
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -30,6 +31,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
 
         setSelectedIds([]);
         setMessage("");
+        setDeliveryMethod("HARDCOPY");
         setSubmitError("");
         setHasFiled(false);
 
@@ -82,6 +84,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                 type: "By Student",
                 details: selectedIds.join(", "),
                 message: message.trim(),
+                deliveryMethod,
             });
 
             setHasFiled(true);
@@ -183,6 +186,39 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                                     maxLength={500}
                                     disabled={submitting}
                                 />
+                            </div>
+
+                            <div className="file-request-section">
+                                <div className="file-request-section-title">
+                                    <span className="file-request-step-num">3</span>
+                                    How do you want to receive the result? <span className="required-asterisk">*</span>
+                                </div>
+                                <div className="delivery-method-options">
+                                    <label className={`delivery-method-option ${deliveryMethod === "HARDCOPY" ? "selected" : ""}`}>
+                                        <input
+                                            type="radio"
+                                            name="deliveryMethod"
+                                            value="HARDCOPY"
+                                            checked={deliveryMethod === "HARDCOPY"}
+                                            onChange={() => setDeliveryMethod("HARDCOPY")}
+                                            disabled={submitting}
+                                        />
+                                        <i className="bi bi-file-earmark-text"></i>
+                                        Hardcopy
+                                    </label>
+                                    <label className={`delivery-method-option ${deliveryMethod === "EMAIL" ? "selected" : ""}`}>
+                                        <input
+                                            type="radio"
+                                            name="deliveryMethod"
+                                            value="EMAIL"
+                                            checked={deliveryMethod === "EMAIL"}
+                                            onChange={() => setDeliveryMethod("EMAIL")}
+                                            disabled={submitting}
+                                        />
+                                        <i className="bi bi-envelope"></i>
+                                        Email
+                                    </label>
+                                </div>
                             </div>
 
                             {submitError && <p className="text-danger">{submitError}</p>}

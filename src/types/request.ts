@@ -9,10 +9,12 @@ export interface RequestItem {
     dateProcessed: string | null;
     remarks: string | null;
     graduationEligibility: string | null;
+    deliveryMethod: string | null;
 }
 
 export interface RequestSubmitPayload {
     details: string;
     message: string;
     type: string;
+    deliveryMethod: "HARDCOPY" | "EMAIL";
 }
