@@ -1,9 +1,10 @@
 import { useEffect, useState, FormEvent } from "react";
 import axios from "axios";
 
-import { submitRequest } from "../../services/requestApi";
+import { submitRequest, getMyDepartmentName } from "../../services/requestApi";
+import { getActiveStudentsByDepartment, type Student } from "../../services/studentApi";
 
-import SearchableDropdown from "./SearchableDropdown";
+import StudentMultiPicker from "./StudentMultiPicker";
 
 import "./FileDeptHeadRequestModal.css";
 
@@ -13,15 +14,11 @@ interface FileDeptHeadRequestModalProps {
     onFiled: () => void;
 }
 
-// TODO: fetch these from the backend (student IDs enrolled in this
-// department head's department) and populate accordingly. Left empty for
-// now — the dropdown UI/behavior can still be reviewed, it'll just have
-// nothing to show until then.
-const STUDENT_OPTIONS: string[] = [];
-
 function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadRequestModalProps) {
 
-    const [details, setDetails] = useState("");
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [students, setStudents] = useState<Student[]>([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
     const [message, setMessage] = useState("");
 
     const [submitting, setSubmitting] = useState(false);
@@ -31,16 +28,41 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     useEffect(() => {
         if (!show) return;
 
-        setDetails("");
+        setSelectedIds([]);
         setMessage("");
         setSubmitError("");
         setHasFiled(false);
+
+        let cancelled = false;
+
+        const loadStudents = async () => {
+            try {
+                setLoadingStudents(true);
+                const department = await getMyDepartmentName();
+                const list = await getActiveStudentsByDepartment(department);
+                if (!cancelled) setStudents(list);
+            } catch (err) {
+                console.error("Failed to load students:", err);
+                if (!cancelled) {
+                    setStudents([]);
+                    setSubmitError("Could not load the student list. Please try again.");
+                }
+            } finally {
+                if (!cancelled) setLoadingStudents(false);
+            }
+        };
+
+        loadStudents();
+
+        return () => {
+            cancelled = true;
+        };
     }, [show]);
 
     if (!show) return null;
 
     const canSubmit =
-        details.trim() !== "" &&
+        selectedIds.length > 0 &&
         message.trim() !== "" &&
         !submitting;
 
@@ -48,7 +70,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
         e.preventDefault();
 
         if (!canSubmit) {
-            setSubmitError("Please fill in both fields before submitting.");
+            setSubmitError("Select at least one student and enter a reason before submitting.");
             return;
         }
 
@@ -58,7 +80,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
 
             await submitRequest({
                 type: "By Student",
-                details: details.trim(),
+                details: selectedIds.join(", "),
                 message: message.trim(),
             });
 
@@ -128,19 +150,18 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                             <div className="file-request-section">
                                 <div className="file-request-section-title">
                                     <span className="file-request-step-num">1</span>
-                                    Student ID <span className="required-asterisk">*</span>
+                                    Students <span className="required-asterisk">*</span>
                                 </div>
                                 <p className="new-request-hint mb-2">
-                                    Requests may only be filed for a single, specific student.
+                                    Search by name or ID and add one or more students from your department.
                                 </p>
-                                <SearchableDropdown
-                                    id="requestDetails"
-                                    value={details}
-                                    onChange={setDetails}
-                                    options={STUDENT_OPTIONS}
-                                    placeholder="e.g. JHS-0046"
+                                <StudentMultiPicker
+                                    id="requestStudents"
+                                    students={students}
+                                    selectedIds={selectedIds}
+                                    onChange={setSelectedIds}
+                                    loading={loadingStudents}
                                     disabled={submitting}
-                                    emptyLabel="No matching student found"
                                 />
                             </div>
 

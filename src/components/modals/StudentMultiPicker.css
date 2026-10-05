@@ -1,0 +1,45 @@
+.student-multi-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.student-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 110px;
+    overflow-y: auto;
+}
+
+.student-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px 10px;
+    border-radius: 999px;
+    background: #ecebfc;
+    color: var(--color-navy-accent, #1b1b8f);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.student-chip small {
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+.student-chip button {
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 0 2px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.student-option-id {
+    float: right;
+    opacity: 0.6;
+    font-size: 12px;
+}

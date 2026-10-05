@@ -107,3 +107,13 @@ export const deleteStudent = async (
 ): Promise<void> => {
     await apiClient.delete(`/api/students/${studentId}`);
 };
+
+export const getActiveStudentsByDepartment = async (
+    department: string
+): Promise<Student[]> => {
+    const response = await apiClient.get<Student[]>(
+        `/api/students/department/${encodeURIComponent(department)}/active`
+    );
+
+    return response.data;
+};
