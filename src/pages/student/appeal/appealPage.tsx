@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { usePolling } from "../../../hooks/usePolling";
-import { formatDateTime } from "../../../utils/dateTime";
 import StatCard from "../../../components/cards/StatCard";
 import AppealCard from "../../../components/cards/AppealCard";
 import FileAppealModal from "../../../components/modals/FileAppealModal";
+import EditAppealModal from "../../../components/modals/EditAppealModal";
 
 import { getStudentAppeals } from "../../../services/appealApi";
 import type { Appeal } from "../../../types/appeal";
@@ -38,6 +38,7 @@ function AppealPage() {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [showFileModal, setShowFileModal] = useState(false);
+    const [editingAppeal, setEditingAppeal] = useState<Appeal | null>(null);
 
     const fetchAppeals = async (silent = false) => {
         try {
@@ -257,7 +258,13 @@ function AppealPage() {
                                     title={appeal.record?.offense?.offense ?? "Offense"}
                                     offenseType={appeal.record?.offense?.type}
                                     status={normalizeStatus(appeal.status)}
-                                    dateSubmitted={formatDateTime(appeal.dateFiled)}
+                                    dateSubmitted={appeal.dateFiled}
+                                    edited={appeal.edited}
+                                    onEdit={
+                                        normalizeStatus(appeal.status) === "Pending"
+                                            ? () => setEditingAppeal(appeal)
+                                            : undefined
+                                    }
                                     remarks={appeal.remarks ?? undefined}
                                 />
                             ))}
@@ -304,6 +311,17 @@ function AppealPage() {
                 show={showFileModal}
                 onClose={() => setShowFileModal(false)}
                 onFiled={handleAppealFiled}
+            />
+
+            <EditAppealModal
+                show={editingAppeal !== null}
+                appealId={editingAppeal ? editingAppeal.appealId : null}
+                initialMessage={editingAppeal ? editingAppeal.message : ""}
+                onClose={() => setEditingAppeal(null)}
+                onSaved={() => {
+                    setEditingAppeal(null);
+                    fetchAppeals();
+                }}
             />
 
         </div>
