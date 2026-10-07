@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+
+import { usePolling } from "../../../hooks/usePolling";
+import { formatDateTime } from "../../../utils/dateTime";
 import StatCard from "../../../components/cards/StatCard";
 import AppealCard from "../../../components/cards/AppealCard";
 import FileAppealModal from "../../../components/modals/FileAppealModal";
@@ -36,10 +39,10 @@ function AppealPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [showFileModal, setShowFileModal] = useState(false);
 
-    const fetchAppeals = async () => {
+    const fetchAppeals = async (silent = false) => {
         try {
-            setLoading(true);
-            setError("");
+            if (!silent) setLoading(true);
+            if (!silent) setError("");
 
             if (!studentId) {
                 setError("No logged-in student.");
@@ -50,11 +53,13 @@ function AppealPage() {
             setAppeals(data);
         } catch (err) {
             console.error("Failed to fetch appeals:", err);
-            setError("Failed to load appeals.");
+            if (!silent) setError("Failed to load appeals.");
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
+
+    usePolling(() => fetchAppeals(true), 15000);
 
     useEffect(() => {
         fetchAppeals();
@@ -252,7 +257,7 @@ function AppealPage() {
                                     title={appeal.record?.offense?.offense ?? "Offense"}
                                     offenseType={appeal.record?.offense?.type}
                                     status={normalizeStatus(appeal.status)}
-                                    dateSubmitted={appeal.dateFiled}
+                                    dateSubmitted={formatDateTime(appeal.dateFiled)}
                                     remarks={appeal.remarks ?? undefined}
                                 />
                             ))}

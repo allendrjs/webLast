@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+
+import { usePolling } from "../../../hooks/usePolling";
+import { dateKey, formatDateTime } from "../../../utils/dateTime";
 import TopBar from "../../../components/navigation/TopBar";
 import UserGreeting from "../../../components/navigation/UserGreeting";
 import StatCard from "../../../components/cards/StatCard";
@@ -19,10 +22,9 @@ function DeptHeadDashboardPage() {
     const [error, setError] = useState("");
     const [now] = useState(new Date());
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            setLoading(true);
-            setError("");
+    const fetchDashboardData = async (silent = false) => {
+            if (!silent) setLoading(true);
+            if (!silent) setError("");
 
             try {
                 const employeeInfo = await getMyEmployeeInfo();
@@ -38,14 +40,17 @@ function DeptHeadDashboardPage() {
                 setRequests(Array.isArray(myRequests) ? myRequests : []);
             } catch (err) {
                 console.error("Failed to fetch requests:", err);
-                setError("Failed to load requests.");
+                if (!silent) setError("Failed to load requests.");
             } finally {
-                setLoading(false);
+                if (!silent) setLoading(false);
             }
         };
 
+    useEffect(() => {
         fetchDashboardData();
     }, []);
+
+    usePolling(() => fetchDashboardData(true), 15000);
 
     const todayIso = now.toISOString().slice(0, 10);
 
@@ -61,7 +66,7 @@ function DeptHeadDashboardPage() {
             label: "Pending Requests",
         },
         {
-            value: requests.filter((r) => r.dateFiled === todayIso).length,
+            value: requests.filter((r) => dateKey(r.dateFiled) === todayIso).length,
             valueColor: "#3cb371",
             label: "Requests Today",
         },
@@ -140,7 +145,7 @@ function DeptHeadDashboardPage() {
                                             <tbody>
                                             {recentRequests.map((req) => (
                                                 <tr key={req.requestId}>
-                                                    <td>{req.dateFiled ?? "—"}</td>
+                                                    <td>{formatDateTime(req.dateFiled)}</td>
                                                     <td>{req.type}</td>
                                                     <td>
                                                         <span
@@ -168,7 +173,7 @@ function DeptHeadDashboardPage() {
                                                 </span>
                                             </div>
                                             <span className="recent-request-card-date">
-                                                {req.dateFiled ?? "—"}
+                                                {formatDateTime(req.dateFiled)}
                                             </span>
                                         </div>
                                     ))}

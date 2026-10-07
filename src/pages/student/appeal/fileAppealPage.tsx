@@ -27,7 +27,6 @@ function FileAppealPage() {
     const [submitStage, setSubmitStage] = useState<"idle" | "uploading" | "filing">("idle");
     const [submitError, setSubmitError] = useState("");
     const [hasFiled, setHasFiled] = useState(false);
-    const [filedSuggestion, setFiledSuggestion] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchRecordsAndAppeals = async () => {
@@ -120,7 +119,6 @@ function FileAppealPage() {
                 documentId: uploadResult.documentId,
             });
 
-            setFiledSuggestion(uploadResult.aiSuggestion);
             setHasFiled(true);
         } catch (err) {
             console.error("Failed to submit appeal:", err);
@@ -153,20 +151,7 @@ function FileAppealPage() {
                         </div>
 
                         <p className="new-appeal-hint mb-4">
-                            Your appeal has been filed and is now waiting for the Prefect's review.
-                            {filedSuggestion
-                                ? " Here's what our system noticed in your letter:"
-                                : " Our system didn't generate a note for this letter."}
-                        </p>
-
-                        {filedSuggestion && (
-                            <div className="ai-suggestion-card mb-4">
-                                <div className="ai-suggestion-text">{filedSuggestion}</div>
-                            </div>
-                        )}
-
-                        <p className="new-appeal-hint mb-4">
-                            This is an automated note to help with the review, not a decision on your appeal.
+                            Request sent to Desktop (Prefect). You can leave this page now.
                         </p>
 
                         <button

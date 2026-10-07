@@ -3,6 +3,7 @@ import TopBar from "../../../components/navigation/TopBar";
 import UserGreeting from "../../../components/navigation/UserGreeting";
 import StudentTable from "../../../components/table/StudentTable";
 import OffenseTable from "../../../components/table/OffenseTable";
+import LockedAccountsTable from "../../../components/table/LockedAccountsTable";
 import StudentAdminModal from "../../../components/modals/StudentAdminModal";
 import OffenseAdminModal from "../../../components/modals/OffenseAdminModal";
 import BulkImportModal, {type BulkImportColumn,} from "../../../components/modals/BulkImportModal";
@@ -15,7 +16,7 @@ import type { Offense } from "../../../types/offense";
 import "./adminDashboardPage.css";
 import StudentContactBirthdayModal from "../../../components/modals/AdminEditModal";
 
-type ActiveTable = "students" | "offenses";
+type ActiveTable = "students" | "offenses" | "accounts";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -765,7 +766,28 @@ function AdminDashboardPage() {
                                 <i className="bi bi-exclamation-triangle-fill"></i>
                                 <span>Offenses</span>
                             </button>
+
+                            <button
+                                type="button"
+                                className={
+                                    activeTable === "accounts"
+                                        ? "dashboard-tab active"
+                                        : "dashboard-tab"
+                                }
+                                onClick={() =>
+                                    changeTable("accounts")
+                                }
+                            >
+                                <i className="bi bi-lock-fill"></i>
+                                <span>Locked Accounts</span>
+                            </button>
                         </div>
+
+                        {activeTable === "accounts" && (
+                            <section>
+                                <LockedAccountsTable />
+                            </section>
+                        )}
 
                         {activeTable === "students" && (
                             <section>

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { usePolling } from "../../../hooks/usePolling";
+
 import TopBar from "../../../components/navigation/TopBar";
 import ProfileHeader from "../../../components/navigation/ProfileHeader";
 import StatCard from "../../../components/cards/StatCard";
@@ -33,11 +35,10 @@ function OffensesPage() {
 
     const [now] = useState(new Date());
 
-    useEffect(() => {
-        const fetchData = async () => {
+    const fetchData = async (silent = false) => {
             try {
-                setLoading(true);
-                setError("");
+                if (!silent) setLoading(true);
+                if (!silent) setError("");
 
                 if (!studentId) {
                     setError("No logged-in student.");
@@ -55,14 +56,18 @@ function OffensesPage() {
                 setAppeals(appealData);
             } catch (err) {
                 console.error("Failed to fetch offense data:", err);
-                setError("Failed to load offense data.");
+                if (!silent) setError("Failed to load offense data.");
             } finally {
-                setLoading(false);
+                if (!silent) setLoading(false);
             }
         };
 
+    useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [studentId]);
+
+    usePolling(() => fetchData(true), 15000);
 
     const section = records[0]?.enrollment?.section || "";
 
