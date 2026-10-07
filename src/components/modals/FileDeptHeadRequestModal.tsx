@@ -21,6 +21,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [message, setMessage] = useState("");
     const [deliveryMethod, setDeliveryMethod] = useState<"HARDCOPY" | "EMAIL">("HARDCOPY");
+    const [deliveryEmail, setDeliveryEmail] = useState("");
 
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -32,6 +33,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
         setSelectedIds([]);
         setMessage("");
         setDeliveryMethod("HARDCOPY");
+        setDeliveryEmail("");
         setSubmitError("");
         setHasFiled(false);
 
@@ -63,16 +65,23 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
 
     if (!show) return null;
 
+    const emailValid = /^[a-z0-9._%+-]+@gmail\.com$/i.test(deliveryEmail.trim());
+
     const canSubmit =
         selectedIds.length > 0 &&
         message.trim() !== "" &&
+        (deliveryMethod !== "EMAIL" || emailValid) &&
         !submitting;
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!canSubmit) {
-            setSubmitError("Select at least one student and enter a reason before submitting.");
+            setSubmitError(
+                deliveryMethod === "EMAIL" && !emailValid
+                    ? "Enter a valid Gmail address (example@gmail.com) to receive the result."
+                    : "Select at least one student and enter a reason before submitting."
+            );
             return;
         }
 
@@ -85,6 +94,7 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                 details: selectedIds.join(", "),
                 message: message.trim(),
                 deliveryMethod,
+                deliveryEmail: deliveryMethod === "EMAIL" ? deliveryEmail.trim().toLowerCase() : undefined,
             });
 
             setHasFiled(true);
@@ -219,6 +229,27 @@ function FileDeptHeadRequestModal({ show, onClose, onFiled }: FileDeptHeadReques
                                         Email
                                     </label>
                                 </div>
+
+                                {deliveryMethod === "EMAIL" && (
+                                    <div className="mt-3">
+                                        <label htmlFor="deliveryEmail" className="form-label">
+                                            Your Gmail address <span className="required-asterisk">*</span>
+                                        </label>
+                                        <input
+                                            id="deliveryEmail"
+                                            type="email"
+                                            className={`form-control ${deliveryEmail && !emailValid ? "is-invalid" : ""}`}
+                                            placeholder="example@gmail.com"
+                                            value={deliveryEmail}
+                                            onChange={(e) => setDeliveryEmail(e.target.value)}
+                                            maxLength={254}
+                                            disabled={submitting}
+                                        />
+                                        {deliveryEmail && !emailValid && (
+                                            <div className="invalid-feedback">Enter a valid @gmail.com address.</div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {submitError && <p className="text-danger">{submitError}</p>}

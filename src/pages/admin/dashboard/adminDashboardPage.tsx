@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent, } from "react";
+import { usePolling } from "../../../hooks/usePolling";
 import TopBar from "../../../components/navigation/TopBar";
 import UserGreeting from "../../../components/navigation/UserGreeting";
 import StudentTable from "../../../components/table/StudentTable";
@@ -154,10 +155,12 @@ function AdminDashboardPage() {
     const [studentInfoFormError, setStudentInfoFormError] = useState("");
     const [savingStudentInfo, setSavingStudentInfo] = useState(false);
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = async (silent = false) => {
         try {
-            setLoading(true);
-            setError("");
+            if (!silent) {
+                setLoading(true);
+                setError("");
+            }
 
             const [studentData, offenseData] = await Promise.all([
                 getAllStudents(),
@@ -179,15 +182,17 @@ function AdminDashboardPage() {
             );
         } catch (err) {
             console.error("Failed to fetch dashboard data:", err);
-            setError("Failed to load dashboard data.");
+            if (!silent) setError("Failed to load dashboard data.");
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchDashboardData();
     }, []);
+
+    usePolling(() => fetchDashboardData(true), 15000);
 
     const filteredStudents = useMemo(() => {
         return students.filter((student) => {
@@ -951,7 +956,7 @@ function AdminDashboardPage() {
                 getRowKey={getStudentRowKey}
                 onImportRow={importStudentRow}
                 onClose={closeStudentImportModal}
-                onComplete={fetchDashboardData}
+                onComplete={() => fetchDashboardData()}
             />
 
             <BulkImportModal
@@ -964,7 +969,7 @@ function AdminDashboardPage() {
                 getRowKey={getOffenseRowKey}
                 onImportRow={importOffenseRow}
                 onClose={closeOffenseImportModal}
-                onComplete={fetchDashboardData}
+                onComplete={() => fetchDashboardData()}
             />
         </div>
     );

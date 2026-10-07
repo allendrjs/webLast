@@ -10,6 +10,7 @@ export interface RequestItem {
     remarks: string | null;
     graduationEligibility: string | null;
     deliveryMethod: string | null;
+    deliveryEmail?: string | null;
 }
 
 export interface RequestSubmitPayload {
@@ -17,4 +18,5 @@ export interface RequestSubmitPayload {
     message: string;
     type: string;
     deliveryMethod: "HARDCOPY" | "EMAIL";
+    deliveryEmail?: string;
 }
