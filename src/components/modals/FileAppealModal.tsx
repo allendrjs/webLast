@@ -26,6 +26,17 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
     const [message, setMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (selectedFile && selectedFile.type.startsWith("image/")) {
+            const url = URL.createObjectURL(selectedFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setPreviewUrl(null);
+    }, [selectedFile]);
 
     const [submitting, setSubmitting] = useState(false);
     const [submitStage, setSubmitStage] = useState<"idle" | "uploading" | "filing">("idle");
@@ -118,10 +129,17 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
         fileInputRef.current?.click();
     };
 
+    const handleScanClick = () => {
+        cameraInputRef.current?.click();
+    };
+
     const handleRemoveFile = () => {
         setSelectedFile(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
+        }
+        if (cameraInputRef.current) {
+            cameraInputRef.current.value = "";
         }
     };
 
@@ -173,7 +191,7 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
     };
 
     const submitLabel =
-        submitStage === "uploading" ? "Processing letter..." :
+        submitStage === "uploading" ? "Uploading letter..." :
             submitStage === "filing" ? "Submitting appeal..." :
                 "Submit Appeal";
 
@@ -305,6 +323,14 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
                                         >
                                             {selectedFile ? "Replace File" : "Browse Files"}
                                         </button>
+                                        <button
+                                            type="button"
+                                            className="upload-browse-btn"
+                                            onClick={handleScanClick}
+                                            disabled={submitting}
+                                        >
+                                            <i className="bi bi-camera"></i> Scan with Camera
+                                        </button>
                                         {selectedFile && (
                                             <button
                                                 type="button"
@@ -316,10 +342,26 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
                                             </button>
                                         )}
                                     </div>
+                                    {previewUrl && (
+                                        <img
+                                            src={previewUrl}
+                                            alt="Letter preview"
+                                            style={{ maxWidth: "100%", maxHeight: 220, marginTop: 12, borderRadius: 8 }}
+                                        />
+                                    )}
+                                    <input
+                                        ref={cameraInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        className="d-none"
+                                        onChange={handleFileChange}
+                                        disabled={submitting}
+                                    />
                                     <input
                                         ref={fileInputRef}
                                         type="file"
-                                        accept=".pdf,.docx,.doc,.jpg,.jpeg,.png"
+                                        accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,image/*"
                                         className="d-none"
                                         onChange={handleFileChange}
                                         disabled={submitting}
