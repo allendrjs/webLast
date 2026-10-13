@@ -1,3 +1,4 @@
+import { formatDateTime } from "../../utils/dateTime";
 import { useEffect, useRef, useState, ChangeEvent, FormEvent } from "react";
 
 import { getStudentRecords } from "../../services/recordApi";
@@ -262,10 +263,10 @@ function FileAppealModal({ show, onClose, onFiled }: FileAppealModalProps) {
                                         const isDenied = blockingStatus === "DENIED";
                                         const isBlocked = blockingStatus !== null;
                                         const label = isDenied
-                                            ? `${record.offense.offense} — filed ${record.dateOfViolation} (Appeal denied — visit OSD in person)`
+                                            ? `${record.offense.offense} — filed ${formatDateTime(record.dateOfViolation)} (Appeal denied — visit OSD in person)`
                                             : isBlocked
-                                                ? `${record.offense.offense} — filed ${record.dateOfViolation} (Appeal pending)`
-                                                : `${record.offense.offense} — filed ${record.dateOfViolation}`;
+                                                ? `${record.offense.offense} — filed ${formatDateTime(record.dateOfViolation)} (Appeal pending)`
+                                                : `${record.offense.offense} — filed ${formatDateTime(record.dateOfViolation)}`;
                                         return (
                                             <option
                                                 key={record.recordId}

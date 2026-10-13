@@ -1,3 +1,4 @@
+import { formatDateTime } from "../../../utils/dateTime";
 import { useEffect, useRef, useState, ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -209,7 +210,7 @@ function FileAppealPage() {
                                             value={String(record.recordId)}
                                             disabled={alreadyAppealed}
                                         >
-                                            {record.offense.offense} — filed {record.dateOfViolation}
+                                            {record.offense.offense} — filed {formatDateTime(record.dateOfViolation)}
                                             {alreadyAppealed ? " — Appeal Pending" : ""}
                                         </option>
                                     );

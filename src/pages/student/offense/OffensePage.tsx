@@ -1,3 +1,4 @@
+import { formatDateTime } from "../../../utils/dateTime";
 import { useEffect, useMemo, useState } from "react";
 
 import { usePolling } from "../../../hooks/usePolling";
@@ -240,7 +241,7 @@ function OffensesPage() {
                                         <tbody>
                                         {pagedRecords.map((record) => (
                                             <tr key={record.recordId}>
-                                                <td>{record.dateOfViolation}</td>
+                                                <td>{formatDateTime(record.dateOfViolation)}</td>
                                                 <td>{record.offense.offense}</td>
                                                 <td>
                                                         <span
